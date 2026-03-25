@@ -2,7 +2,7 @@
 <img width="1602" height="932" alt="image" src="https://github.com/user-attachments/assets/5f7b2659-0245-46db-9f2b-d33313f1eec9" />
 
 [説明 / About]\
-Unity上で動作するパチスロのシミュレーターです。サンプルゲームとして過去作で作成した"Nostalgia"のリメイク版を同梱しています。
+Unity上で動作するパチスロシミュレーターです。過去作で作成した"Nostalgia"のリメイク版を同梱しています。
 
 ### SampleGame Instructions (Nostalgia)
 
@@ -34,11 +34,8 @@ Mキー:メニュー開閉\
 \
 \
 [ReelSpinEngine(RSE)について / About ReelSpinEngine(RSE)]\
-本コードの改変、再頒布を許可します。詳しくは"LICENSE"ファイルをご覧ください。\
-\
-以下のリンクからソースコードで使用しているスプレッドシートをコピーすることができます。\
-Google スプレッドシートにてコピーし開いてください。その他の表計算ソフトでの動作は保証していません。\
-https://drive.google.com/drive/folders/1Ea28mKtEinN5_U4SauYqHPnSEJKf_OM8?usp=drive_link
+[3/25]更新 \
+改変用にデータファイルを公開しておりましたが、現在RSE新バージョン開発のため公開を停止しております。 \
 \
 \
 [クレジット / Credit]\
