@@ -58,6 +58,7 @@ namespace ReelSpinGame_Option.MenuBar
         void Start()
         {
             // 画面を非表示にする
+            SetInteractiveAllButton(false);
             howToPlayScreen.gameObject.SetActive(false);
             slotDataScreen.gameObject.SetActive(false);
             forceFlagScreen.gameObject.SetActive(false);
@@ -102,11 +103,8 @@ namespace ReelSpinGame_Option.MenuBar
         // 画面を閉じる
         public void CloseScreen()
         {
-            if (CanInteract)
-            {
-                SetInteractiveAllButton(false);
-                StartCoroutine(nameof(FadeOutBehavior));
-            }
+            SetInteractiveAllButton(false);
+            StartCoroutine(nameof(FadeOutBehavior));
         }
 
         // 遊び方ガイドを開いた時の処理

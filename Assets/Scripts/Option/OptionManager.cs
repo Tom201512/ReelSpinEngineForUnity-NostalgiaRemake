@@ -98,7 +98,10 @@ namespace ReelSpinGame_Option
         {
             LockOptionMode = value;
             menuBarUI.HasOptionLock = value;
-            menuBarUI.SetInteractiveAllButton(!value);
+            if (menuBarUI.CanInteract)
+            {
+                menuBarUI.SetInteractiveAllButton(!value);
+            }
         }
 
         // Še‰æ–Ê‚Ìİ’èî•ñæ“¾

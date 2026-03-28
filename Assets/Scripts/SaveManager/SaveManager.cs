@@ -90,7 +90,7 @@ namespace ReelSpinGame_System
             string keyPath = Application.persistentDataPath + PlayerKeyPath;
 
             // 前のセーブを消去
-            if (Directory.Exists(path))
+            if (File.Exists(path))
             {
                 DeleteSave(path, keyPath);
             }
@@ -165,7 +165,7 @@ namespace ReelSpinGame_System
             string keyPath = Application.persistentDataPath + OptionKeyPath;
 
             // 前のセーブを消去
-            if (Directory.Exists(path))
+            if (File.Exists(path))
             {
                 DeleteSave(path, keyPath);
             }

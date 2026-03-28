@@ -100,6 +100,7 @@ namespace ReelSpinGame_Bonus
             data.BigChanceType = bigColor;
             // 連チャン区間の記録開始
             data.HasZone = true;
+            data.HasBonusStarted = true;
         }
 
         // ボーナスゲームの開始
@@ -114,6 +115,7 @@ namespace ReelSpinGame_Bonus
             if (data.CurrentBonusStatus != BonusStatus.BonusBIGGames)
             {
                 data.CurrentBonusPayout = 0;
+                data.HasBonusStarted = true;
             }
 
             // ボーナスゲームの初期化
@@ -215,6 +217,7 @@ namespace ReelSpinGame_Bonus
             data.RemainingJacGames = 0;
             data.RemainingJacHits = 0;
             data.CurrentBonusStatus = BonusStatus.BonusNone;
+            data.HasBonusFinished = true;
         }
     }
 }

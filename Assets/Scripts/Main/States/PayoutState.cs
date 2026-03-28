@@ -32,7 +32,6 @@ namespace ReelSpinGame_State.PayoutState
 
             // 払い出し確認
             gM.Payout.CheckPayouts(gM.Medal.LastBetAmount, gM.Reel.GetLastStoppedReelData());
-            PayoutUpdate();
 
             // 小役カウンタの増減(通常時のみ)
             if (gM.Bonus.GetCurrentBonusStatus() == BonusStatus.BonusNone)
@@ -52,8 +51,17 @@ namespace ReelSpinGame_State.PayoutState
                 gM.Player.PlayerAnalyticsData.IncreaseLineUpCountByFlag(gM.Lots.GetCurrentFlag(), gM.Bonus.GetCurrentBonusStatus());
             }
 
-            // 状態遷移
-            CheckGameModeStatusChange();
+            // ボーナス開始をチェック
+            CheckStartBonus();
+
+            // 払い出し開始
+            PayoutUpdate();
+
+            // ボーナス終了をチェック
+            CheckBonusEnd();
+
+            // ボーナス状態の更新
+            BonusStatusUpdate();
 
             // JACハズシの記録
             if (gM.Bonus.GetCurrentBonusStatus() == BonusStatus.BonusBIGGames && gM.Lots.GetCurrentFlag() == FlagID.FlagReplayJacIn)
@@ -144,6 +152,56 @@ namespace ReelSpinGame_State.PayoutState
             }
         }
 
+        // ボーナスをストックさせる
+        void StockBonus()
+        {
+            // ボーナス未成立でいずれかのボーナスが成立した場合はストック
+            if (gM.Bonus.GetHoldingBonusID() == BonusTypeID.BonusNone)
+            {
+                if (gM.Lots.GetCurrentFlag() == FlagID.FlagBig)
+                {
+                    gM.Bonus.SetBonusStock(BonusTypeID.BonusBIG);
+                }
+                if (gM.Lots.GetCurrentFlag() == FlagID.FlagReg)
+                {
+                    gM.Bonus.SetBonusStock(BonusTypeID.BonusREG);
+                }
+            }
+        }
+
+        // ボーナス開始をチェック
+        void CheckStartBonus()
+        {
+            // 通常時
+            if (gM.Bonus.GetCurrentBonusStatus() == BonusStatus.BonusNone)
+            {
+                // ボーナスがあればボーナス開始
+                if (gM.Payout.LastPayoutResult.BonusID != (int)BonusTypeID.BonusNone)
+                {
+                    StartBonus();
+                }
+                // 取りこぼした場合はストックさせる
+                else
+                {
+                    StockBonus();
+                }
+
+                // オートがあり、条件がボーナス成立なら終了判定
+                if (gM.Auto.HasAuto)
+                {
+                    gM.Auto.CheckAutoEndByBonus(gM.Payout.LastPayoutResult.BonusID);
+                }
+            }
+
+            // 連チャン区間の処理
+            // 50Gを迎えた場合は連チャン区間を終了させる(但しボーナス非成立時のみ)
+            if (gM.Player.CurrentGames == MaxZoneGames &&
+                gM.Bonus.GetHoldingBonusID() == BonusTypeID.BonusNone)
+            {
+                gM.Bonus.ResetZonePayout();
+            }
+        }
+
         //　ボーナス開始
         void StartBonus()
         {
@@ -163,64 +221,16 @@ namespace ReelSpinGame_State.PayoutState
                 gM.Bonus.StartBonusGame();
             }
 
-            // 15枚の払い出しを記録
-            gM.Bonus.ChangeBonusPayout(gM.Payout.LastPayoutResult.Payout);
-            // 連チャン区間中なら枚数記録
-            if (gM.Bonus.GetHasZone())
-            {
-                gM.Bonus.ChangeZonePayout(gM.Payout.LastPayoutResult.Payout);
-            }
             // カウンタリセット
             gM.Lots.ResetCounter();
             // 入賞時ゲーム数を記録
             gM.Player.SetLastBonusStart();
-            // ボーナス開始を記録
-            gM.Bonus.SetHasBonusStarted(true);
         }
 
-        // ボーナスをストックさせる
-        void StockBonus()
+        // ボーナス終了をチェック
+        void CheckBonusEnd()
         {
-            // ボーナス未成立でいずれかのボーナスが成立した場合はストック
-            if (gM.Bonus.GetHoldingBonusID() == BonusTypeID.BonusNone)
-            {
-                if (gM.Lots.GetCurrentFlag() == FlagID.FlagBig)
-                {
-                    gM.Bonus.SetBonusStock(BonusTypeID.BonusBIG);
-                }
-                if (gM.Lots.GetCurrentFlag() == FlagID.FlagReg)
-                {
-                    gM.Bonus.SetBonusStock(BonusTypeID.BonusREG);
-                }
-            }
-        }
-
-        // 各ゲームモード時の状態チェック
-        void CheckGameModeStatusChange()
-        {
-            // 通常時
-            if (gM.Bonus.GetCurrentBonusStatus() == BonusStatus.BonusNone)
-            {
-                // ボーナスがあればボーナス開始
-                if (gM.Payout.LastPayoutResult.BonusID != (int)BonusTypeID.BonusNone)
-                {
-                    StartBonus();
-                    BonusStatusUpdate();
-                }
-                // 取りこぼした場合はストックさせる
-                else
-                {
-                    StockBonus();
-                }
-
-                // オートがあり、条件がボーナス成立なら終了判定
-                if (gM.Auto.HasAuto)
-                {
-                    gM.Auto.CheckAutoEndByBonus(gM.Payout.LastPayoutResult.BonusID);
-                }
-            }
-            // それ以外(すでにボーナスが当選している場合)
-            else
+            if (gM.Bonus.GetCurrentBonusStatus() != BonusStatus.BonusNone)
             {
                 if (gM.Bonus.GetCurrentBonusStatus() == BonusStatus.BonusBIGGames)
                 {
@@ -229,23 +239,13 @@ namespace ReelSpinGame_State.PayoutState
                 else if (gM.Bonus.GetCurrentBonusStatus() == BonusStatus.BonusJACGames)
                 {
                     gM.Bonus.CheckBonusGameStatus(gM.Payout.LastPayoutResult.Payout > 0);
-
                 }
+
                 // オートがあり終了条件がボーナス終了時の場合はここで判定する
                 if (gM.Auto.HasAuto)
                 {
                     gM.Auto.CheckAutoEndByBonusFinish((int)gM.Bonus.GetCurrentBonusStatus());
                 }
-                // ボーナス状態更新
-                BonusStatusUpdate();
-            }
-
-            // 連チャン区間の処理
-            // 50Gを迎えた場合は連チャン区間を終了させる(但しボーナス非成立時のみ)
-            if (gM.Player.CurrentGames == MaxZoneGames &&
-                gM.Bonus.GetHoldingBonusID() == BonusTypeID.BonusNone)
-            {
-                gM.Bonus.ResetZonePayout();
             }
         }
 
@@ -273,9 +273,6 @@ namespace ReelSpinGame_State.PayoutState
                 gM.Lots.ChangeTable(FlagLotTable.Normal);
                 gM.Payout.ChangePayoutCheckMode(PayoutCheckMode.PayoutNormal);
                 gM.Medal.ChangeMaxBet(3);
-
-                // ボーナス終了フラグを立てる
-                gM.Bonus.SetHasBonusFinished(true);
             }
         }
     }
